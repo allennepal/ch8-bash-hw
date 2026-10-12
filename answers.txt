@@ -1,0 +1,34 @@
+Chapter 8 Homework Exercises
+
+Exercise 4:
+a. echo $person -> Output: zach
+b. echo '$person' -> Output: $person
+c. echo "$person" -> Output: zach
+
+--------------------------------------------------
+Exercise 5:
+a. chmod +x journal
+b. read takes one line; cat reads multi-line input until EOF.
+
+--------------------------------------------------
+Exercise 6:
+a. /home/zach/grants/biblios (CDPATH match)
+b. /home/zach/biblios (absolute path ignores CDPATH)
+
+--------------------------------------------------
+Exercise 7:
+1. echo $$
+2. ps -p $%
+
+--------------------------------------------------
+Exercise 10:
+#!/bin/bash
+echo "$0"
+
+--------------------------------------------------
+Exercise 13:
+dirname() { local p="$1"; while [[ "$p" != "/" && "$p" == */ ]]; do p="${p%/}"; done: if [[ "$p" == "/" ]]; then echo "/"; elif [[ "$p" != */*]]; then echo "."; else local d="${p%/*}"; [[ -z "$d" ]] && echo "/" || echo "$d"; fi; }
+
+--------------------------------------------------
+Exercise 14:
+basename() { local p="$1"; while [[ "$p" != "/" && "$p" == */ ]]; do p="${p%/}"; done; [[ "$p" == "/" ]] && echo "/" || echo "${p###/}"; }
