@@ -1,0 +1,163 @@
+Exercise 4:
+$ person=zach
+
+a. echo $person
+Output: zach
+Explanation: The shell expands the variable $person into its stored value (zach).
+
+b. echo '$person'
+Output: $person
+Explanation: Single quotes suppress all shell expansion, preserving the characters literally.
+
+c. echo "$person"
+Output: zach
+Explanation: Double quotes still permit variable expansion, replacing $person with zach.
+
+--------------------------------------------------
+Exercise 5:
+
+a. What do you have to do to the script to be able to execute it?
+Answer:
+You must give the file execute permission using chmod:
+    chmod +x journal
+(or explicitly for the user: chmod u+x journal).
+Alternatively, you can run it via a subshell without execute permissions:
+    bash journal
+
+b. Why does the script use the "read" builtin the first time it accepts input from the terminal and the "cat" utility the second time?
+Answer:
+- "read name" reads a single line of input from standard input and assigns it directly to a variable.
+- "cat >> $file" reads multiple lines of arbitrary text continuously until it encounters an End-of-File signal (Ctrl+D), allowing the user to type an open-ended, multi-line journal entry.
+
+--------------------------------------------------
+Exercise 6:
+
+Assume the /home/zach/grants/biblios and /home/zach/biblios directories exist.
+
+a.
+Commands:
+    $ pwd
+    /home/zach/grants
+    $ CDPATH=$(pwd)
+    $ cd
+    $ cd biblios
+
+Working Directory: /home/zach/grants/biblios
+Explanation:
+CDPATH is assigned the value of $(pwd), which is /home/zach/grants. The bare 'cd' command switches back to Zach's home directory (/home/zach). When running 'cd biblios', the shell checks the directories listed in CDPATH first before using the current directory. Since /home/zach/grants contains a subdirectory named biblios, the shell changes into /home/zach/grants/biblios.
+
+b.
+Commands:
+    $ pwd
+    /home/zach/grants
+    $ CDPATH=$(pwd)
+    $ cd $HOME/biblios
+
+Working Directory: /home/zach/biblios
+Explanation:
+When cd is passed an explicit or absolute pathname starting with '/' (which $HOME expands to), the CDPATH search mechanism is bypassed completely. The shell navigates straight to /home/zach/biblios.
+
+--------------------------------------------------
+Exercise 7:
+
+Name two ways you can identify the PID number of the login shell.
+
+Answer:
+1. Using the special parameter $$:
+   Run the command:
+       echo $$
+   In the login shell, $$ expands directly to the Process ID (PID) of the current shell process.
+
+2. Using the ps utility:
+   Run the command:
+       ps -f
+   (or ps -l). In the resulting process listing, look for the process entry running "-bash" (the leading hyphen indicates a login shell). The number in the PID column is the PID of that login shell.
+
+--------------------------------------------------
+Exercise 10:
+
+Write a shell script that outputs the name of the shell executing it.
+
+Answer:
+Script code:
+#!/bin/bash
+ps -p $$ -o comm=
+
+Explanation:
+- '$$' holds the process ID (PID) of the current subshell process executing the script.
+- The 'ps' command with '-p $$' targets that specific PID.
+- The '-o comm=' option instructs ps to output only the command/executable name (suppressing table header columns), printing "bash".
+
+Alternative implementation:
+#!/bin/bash
+echo "${0##*/}"
+
+Explanation:
+'$0' stores the path name used to invoke the script or shell, and '${0##*/}' strips the directory prefix to leave just the shell name.
+
+--------------------------------------------------
+Exercise 13:
+
+Implement dirname as a bash function. Make sure it behaves sensibly when given such arguments as /.
+
+Answer:
+dirname() {
+    local path="$1"
+
+    # Strip trailing slashes unless path is root "/"
+    while [[ "$path" != "/" && "$path" == */ ]]; do
+        path="${path%/}"
+    done
+
+    # If the path is root "/"
+    if [[ "$path" == "/" ]]; then
+        echo "/"
+        return 0
+    fi
+
+    # If the path contains a slash, strip off the last component
+    if [[ "$path" == */* ]]; then
+        path="${path%/*}"
+        # If path stripped down to empty (e.g., /file), the directory is root /
+        echo "${path:-/}"
+    else
+        # No slash found in the argument
+        echo "."
+    fi
+}
+
+Explanation:
+- Trailing slashes are stripped first using pattern removal (${path%/}) so paths like "a/b/c/" are handled accurately.
+- If the path is simply "/", it returns "/".
+- "${path%/*}" uses shell parameter expansion to remove everything after the last slash.
+- If no slash is present, it returns "." as required.
+
+--------------------------------------------------
+Exercise 14:
+
+Implement the basename utility, which writes the last component of its pathname argument to standard output, as a bash function.
+
+Answer:
+basename() {
+    local path="$1"
+
+    # Strip trailing slashes unless path is root "/"
+    while [[ "$path" != "/" && "$path" == */ ]]; do
+        path="${path%/}"
+    done
+
+    # If the path is root "/"
+    if [[ "$path" == "/" ]]; then
+        echo "/"
+        return 0
+    fi
+
+    # Strip everything up to and including the last slash
+    echo "${path##*/}"
+}
+
+Explanation:
+- Trailing slashes are stripped first so paths like "a/b/c/" return "c" rather than an empty string.
+- If the path is root "/", it outputs "/".
+- "${path##*/}" uses greedy parameter pattern stripping to delete everything up to the final "/" character, isolating and returning only the file or directory base name.
+
